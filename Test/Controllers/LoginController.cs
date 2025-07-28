@@ -14,35 +14,74 @@ namespace Test.Controllers
         }
 
         [HttpPost]
-        public ActionResult Index(string UserName, string Password)
+        public ActionResult Index(string UserName, string Password, string Message)
         {
+            ViewBag.InputUsername = UserName;
+            ViewBag.InputPassword = Password;
+
             string connStr = ConfigurationManager.ConnectionStrings["MyDbConnection"].ConnectionString;
-            using (SqlConnection conn = new SqlConnection(connStr))
-            {
-                string query = "SELECT Id FROM U_User WHERE UserName = @UserName AND Password = @Password";
-
-                SqlCommand cmd = new SqlCommand(query, conn);
-                cmd.Parameters.AddWithValue("@UserName", UserName);
-                cmd.Parameters.AddWithValue("@Password", Password);
-
-                conn.Open();
-                object result = cmd.ExecuteScalar();
-
-                if (result != null)
+            try {
+                using (SqlConnection conn = new SqlConnection(connStr))
                 {
-                    int userId = Convert.ToInt32(result);
-                    Session["Id"] = userId;
-                    Session["UserName"] = UserName;
-                    Session["token"] = Guid.NewGuid().ToString();
+                    conn.Open();
 
-                    return RedirectToAction("Dashboard", "Home");
-                }
-                else
-                {
-                    ViewBag.Error = "Error Occurred Due To Mismatch Of Username and Password";
-                    return View();
+                    if (conn.State == System.Data.ConnectionState.Open)
+                    {
+                        Message = "Open";
+                    }
+                    else
+                    {
+                        Message = "Not Open";
+                    }
+
+                    //conn.Open();
+
+
+                    string query = "Select ID,	USERNAME,	PASSWORD from U_User Where USERNAME = @UserName AND PASSWORD = @Password ";
+                    
+
+                    SqlCommand cmd = new SqlCommand(query, conn);
+                    cmd.Parameters.AddWithValue("@UserName", UserName);
+                    cmd.Parameters.AddWithValue("@Password", Password);
+
+                    
+                    
+                    string version = conn.ServerVersion;
+                    Console.WriteLine(Message);
+
+                    object result = cmd.ExecuteScalar();
+
+                    if (result != null)
+                    {
+                        //int userId = Convert.ToInt32(result);
+                        //Session["Id"] = userId;
+                        Session["UserName"] = UserName;
+                        Session["token"] = Guid.NewGuid().ToString();
+
+                     // return RedirectToAction("Index", "Home");
+                        return View("~/Views/Home/Home.cshtml");
+
+                    }
+                    else
+                    {
+                        ViewBag.Error = "Error Occurred Due To Mismatch Of Username and Password";
+                        return View();
+                    }
                 }
             }
+
+            catch (Exception ex)
+            {
+                Message = " Connection Failed: " + ex.Message;
+            }
+
+            ViewBag.Status = Message;
+            return RedirectToAction("Index","Home");
+
         }
+
     }
 }
+
+
+

@@ -8,15 +8,18 @@ namespace Test.Controllers
 {
     public class HomeController : Controller
     {
-        public ActionResult Dashboard()
+        public ActionResult Index()
         {
             if (Session["UserName"] == null)
             {
-                return RedirectToAction("Login","Index");
+                Console.WriteLine("Hello");
             }
 
             ViewBag.Username = Session["UserName"];
             return View();
         }
     }
+
 }
+
+
