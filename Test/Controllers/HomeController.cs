@@ -8,14 +8,10 @@ namespace Test.Controllers
 {
     public class HomeController : Controller
     {
+       [HttpGet ]
         public ActionResult Index()
         {
-            if (Session["UserName"] == null)
-            {
-                Console.WriteLine("Hello");
-            }
-
-            ViewBag.Username = Session["UserName"];
+            ViewBag.User = Session["UserName"];
             return View();
         }
     }
